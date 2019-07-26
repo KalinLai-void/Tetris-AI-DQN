@@ -4,6 +4,7 @@ from collections import deque
 import numpy as np
 import random
 
+
 # Deep Q Learning Agent + Maximin
 #
 # This version only provides only value per input,
@@ -14,7 +15,7 @@ import random
 # action for a particular state.
 class DQNAgent:
 
-    '''Deep Q Learning Agent + Maximin
+    """Deep Q Learning Agent + Maximin
 
     Args:
         state_size (int): Size of the input domain
@@ -28,11 +29,11 @@ class DQNAgent:
         loss (obj): Loss function
         optimizer (obj): Otimizer used
         replay_start_size: Minimum size needed to train
-    '''
+    """
 
     def __init__(self, state_size, mem_size=10000, discount=0.95,
                  epsilon=1, epsilon_min=0, epsilon_stop_episode=500,
-                 n_neurons=[32,32], activations=['relu', 'relu', 'linear'],
+                 n_neurons=[32, 32], activations=['relu', 'relu', 'linear'],
                  loss='mse', optimizer='adam', replay_start_size=None):
 
         assert len(activations) == len(n_neurons) + 1

@@ -2,7 +2,22 @@
 
 A bot that plays [tetris](https://en.wikipedia.org/wiki/Tetris) using deep reinforcement learning.
 
+## Interactive mode
+
+Classic style, where the user may control pieces with the keyboard.
+```bash
+python interactive.py
+```
+
 ## Demo
+
+```bash
+sudo apt install libgtk2.0-dev pkg-config
+# https://stackoverflow.com/a/14656610/5066426
+conda remove opencv
+conda install -c conda-forge opencv=4.1.0
+```
+
 
 First 10000 points, after training.
 

@@ -56,7 +56,7 @@ def dqn():
                     best_action = action
                     break
 
-            reward, done = env.play(best_action[0], best_action[1], render=render,
+            reward, done = env.hard_drop([best_action[0], 0], best_action[1], render=render,
                                     render_delay=render_delay)
             
             agent.add_to_memory(current_state, next_states[best_action], reward, done)
