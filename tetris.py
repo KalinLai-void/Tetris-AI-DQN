@@ -71,7 +71,7 @@ class Tetris:
     def __init__(self):
         self.reset()
 
-    
+
     def reset(self):
         '''Resets the game, returning the current state'''
         self.board = [[0] * Tetris.BOARD_WIDTH for _ in range(Tetris.BOARD_HEIGHT)]
@@ -106,7 +106,7 @@ class Tetris:
         For lines cleared, it is used BOARD_WIDTH * lines_cleared ^ 2.
         '''
         return self.score
-    
+
 
     def _new_round(self):
         '''Starts a new round (new piece)'''
@@ -114,7 +114,7 @@ class Tetris:
         if len(self.bag) == 0:
             self.bag = list(range(len(Tetris.TETROMINOS)))
             random.shuffle(self.bag)
-        
+
         self.current_piece = self.next_piece
         self.next_piece = self.bag.pop()
         self.current_pos = [3, 0]
@@ -151,7 +151,7 @@ class Tetris:
 
 
     def _add_piece_to_board(self, piece, pos):
-        '''Place a piece in the board, returning the resulting board'''        
+        '''Place a piece in the board, returning the resulting board'''
         board = [x[:] for x in self.board]
         for x, y in piece:
             board[y + pos[1]][x + pos[0]] = Tetris.MAP_BLOCK
@@ -194,7 +194,7 @@ class Tetris:
             while i < Tetris.BOARD_HEIGHT and col[i] != Tetris.MAP_BLOCK:
                 i += 1
             min_ys.append(i)
-        
+
         for i in range(len(min_ys) - 1):
             bumpiness = abs(min_ys[i] - min_ys[i+1])
             max_bumpiness = max(bumpiness, max_bumpiness)
@@ -236,8 +236,8 @@ class Tetris:
         '''Get all possible next states'''
         states = {}
         piece_id = self.current_piece
-        
-        if piece_id == 6: 
+
+        if piece_id == 6:
             rotations = [0]
         elif piece_id == 0:
             rotations = [0, 90]
@@ -286,7 +286,7 @@ class Tetris:
             self.current_pos[1] += 1
         self.current_pos[1] -= 1
 
-        # Update board and calculate score        
+        # Update board and calculate score
         self.board = self._add_piece_to_board(self._get_rotated_piece(), self.current_pos)
         lines_cleared, self.board = self._clear_lines(self.board)
         score = 1 + (lines_cleared ** 2) * Tetris.BOARD_WIDTH
