@@ -8,8 +8,6 @@ env = Tetris()
 env.reset()
 env.render()
 
-rotation = 0
-
 iteration = 0
 while True:
     k = cv2.waitKey(100)  # 10 milliseconds
@@ -25,8 +23,6 @@ while True:
         env.move([0, +1], 0, True)
     elif k == 82:  # up
         # clockwise rotation
-        rotation += 1
-        print('rotation=', rotation)
         env.move([0, 0], -90, True)
     elif k == 32:  # space
         _, done = env.hard_drop(env.current_pos, env.current_rotation, render=True, render_delay=0)
