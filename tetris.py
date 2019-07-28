@@ -3,11 +3,13 @@ from typing import Dict, List, Tuple
 
 import cv2
 import numpy as np
+import itertools
 from PIL import Image
 from time import sleep
 
 
 # Tetris game class
+# noinspection PyMethodMayBeStatic
 class Tetris:
     """Tetris game class"""
 
@@ -187,10 +189,8 @@ class Tetris:
         holes = 0
 
         for col in zip(*board):
-            i = 0
-            while i < Tetris.BOARD_HEIGHT and col[i] != Tetris.MAP_BLOCK:
-                i += 1
-            holes += len([x for x in col[i + 1:] if x == Tetris.MAP_EMPTY])
+            tail = itertools.dropwhile(lambda x: x != Tetris.MAP_BLOCK, col)
+            holes += len([x for x in tail if x == Tetris.MAP_EMPTY])
 
         return holes
 
@@ -201,15 +201,14 @@ class Tetris:
         min_ys = []
 
         for col in zip(*board):
-            i = 0
-            while i < Tetris.BOARD_HEIGHT and col[i] != Tetris.MAP_BLOCK:
-                i += 1
-            min_ys.append(i)
+            tail = itertools.dropwhile(lambda x: x != Tetris.MAP_BLOCK, col)
+            n = Tetris.BOARD_HEIGHT - len([x for x in tail])
+            min_ys.append(n)
 
-        for i in range(len(min_ys) - 1):
-            bumpiness = abs(min_ys[i] - min_ys[i + 1])
+        for (y0, y1) in window(min_ys):
+            bumpiness = abs(y0 - y1)
             max_bumpiness = max(bumpiness, max_bumpiness)
-            total_bumpiness += abs(min_ys[i] - min_ys[i + 1])
+            total_bumpiness += bumpiness
 
         return total_bumpiness, max_bumpiness
 
@@ -220,15 +219,12 @@ class Tetris:
         min_height = Tetris.BOARD_HEIGHT
 
         for col in zip(*board):
-            i = 0
-            while i < Tetris.BOARD_HEIGHT and col[i] == Tetris.MAP_EMPTY:
-                i += 1
-            height = Tetris.BOARD_HEIGHT - i
+            tail = itertools.dropwhile(lambda x: x != Tetris.MAP_BLOCK, col)
+            height = len([x for x in tail])
+
             sum_height += height
-            if height > max_height:
-                max_height = height
-            elif height < min_height:
-                min_height = height
+            max_height = max(height, max_height)
+            min_height = min(height, min_height)
 
         return sum_height, max_height, min_height
 
@@ -278,7 +274,7 @@ class Tetris:
         """Size of the state"""
         return 4
 
-    def move(self, shift_m, shift_r, render=False) -> bool:
+    def move(self, shift_m, shift_r) -> bool:
         pos = self.current_pos.copy()
         pos[0] += shift_m[0]
         pos[1] += shift_m[1]
@@ -288,48 +284,39 @@ class Tetris:
         if self.is_valid_position(piece, pos):
             self.current_pos = pos
             self.current_rotation = rotation
-            if render:
-                self.render()
             return True
         return False
 
-    def fall(self, render=False) -> bool:
+    def fall(self) -> bool:
         """:returns: True, if there was a fall move, False otherwise"""
-        if not self.move([0, 1], 0, render=False):
+        if not self.move([0, 1], 0):
             # cannot fall further
             # start new round
             self._new_round(piece_fall=True)
             if self.game_over:
                 self.score -= 2
-            if render:
-                self.render()
         return self.game_over
 
-    def hard_drop(self, pos, rotation, render=False, render_delay=None):
+    def hard_drop(self, pos, rotation, render=False):
         """Makes a hard drop given a position and a rotation, returning the reward and if the game is over"""
         self.current_pos = pos
         self.current_rotation = rotation
-
         # drop piece
         piece = self._get_rotated_piece(self.current_rotation)
         while self.is_valid_position(piece, self.current_pos):
             if render:
-                self.render()
-                if render_delay:
-                    sleep(render_delay)
+                self.render(wait_key=True)
             self.current_pos[1] += 1
         self.current_pos[1] -= 1
-
         # start new round
         score = self._new_round(piece_fall=True)
         if self.game_over:
             score -= 2
         if render:
-            self.render()
-
+            self.render(wait_key=True)
         return score, self.game_over
 
-    def render(self):
+    def render(self, wait_key=False):
         """Renders the current board"""
         img = [Tetris.COLORS[p] for row in self._get_complete_board() for p in row]
         img = np.array(img).reshape((Tetris.BOARD_HEIGHT, Tetris.BOARD_WIDTH, 3)).astype(np.uint8)
@@ -339,4 +326,20 @@ class Tetris:
         img = np.array(img)
         cv2.putText(img, str(self.score), (22, 22), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
         cv2.imshow('image', np.array(img))
-        # cv2.waitKey(0)
+        if wait_key:
+            # this is needed to render during training
+            cv2.waitKey(1)
+
+
+def window(seq, n=2):
+    """Returns a sliding window (of width n) over data from the iterable
+       s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...
+       NB. taken from https://docs.python.org/release/2.3.5/lib/itertools-example.html
+    """
+    it = iter(seq)
+    result = tuple(itertools.islice(it, n))
+    if len(result) == n:
+        yield result
+    for elem in it:
+        result = result[1:] + (elem,)
+        yield result
