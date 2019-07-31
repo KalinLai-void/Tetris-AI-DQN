@@ -18,8 +18,8 @@ sudo apt install libgtk2.0-dev pkg-config
 conda create --name tf37 python=3.7 tensorflow
 conda remove opencv
 conda install -c conda-forge opencv=4.1.0
+conda install keras pillow tqdm
 ```
-
 
 First 10000 points, after training.
 
