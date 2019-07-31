@@ -1,7 +1,7 @@
 import cv2
 from dqn_agent import DQNAgent
 from tetris import Tetris
-from run import AgentConf
+from run_train import AgentConf
 from keras.engine.saving import load_model
 
 
@@ -49,25 +49,7 @@ def run_eval(dir_name):
 
 def enumerate_run_eval():
     dirs = [
-        # 'tetris-20190731-172645-nn=[32, 32]-mem=15000-bs=512-e=1',
-        # 'tetris-20190731-180835-nn=[32, 32]-mem=25000-bs=512-e=1',
-        # 'tetris-20190731-184008-nn=[32, 32]-mem=25000-bs=64-e=1',
-        # 'tetris-20190731-190022-nn=[32, 32]-mem=25000-bs=128-e=1',
-        # 'tetris-20190731-200804-nn=[32, 32]-mem=5000-bs=256-e=1',
-        # 'tetris-20190731-201826-nn=[32, 32]-mem=10000-bs=256-e=1',
-        # 'tetris-20190731-203105-nn=[32, 32]-mem=15000-bs=256-e=1',
-        # 'tetris-20190731-204235-nn=[32, 32]-mem=20000-bs=256-e=1',
-        # 'tetris-20190731-205614-nn=[32, 32]-mem=25000-bs=256-e=1',
-        # 'tetris-20190731-210946-nn=[32, 32]-mem=5000-bs=512-e=1',
-        # 'tetris-20190731-212322-nn=[32, 32]-mem=10000-bs=512-e=1',
-        # 'tetris-20190731-213758-nn=[32, 32]-mem=15000-bs=512-e=1',
-        # 'tetris-20190731-215701-nn=[32, 32]-mem=20000-bs=512-e=1',
         'tetris-20190731-221411-nn=[32, 32]-mem=25000-bs=512-e=1',
-        # 'tetris-20190731-223042-nn=[32, 32]-mem=5000-bs=1024-e=1',
-        'tetris-20190731-224908-nn=[32, 32]-mem=10000-bs=1024-e=1',
-        # 'tetris-20190731-230310-nn=[32, 32]-mem=15000-bs=1024-e=1',
-        # 'tetris-20190731-232109-nn=[32, 32]-mem=20000-bs=1024-e=1',
-        # 'tetris-20190731-234617-nn=[32, 32]-mem=25000-bs=1024-e=1',
     ]
     for d in dirs:
         print(f"Evaluating dir '{d}'")

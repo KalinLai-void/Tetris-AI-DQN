@@ -1,5 +1,4 @@
 from typing import Optional, Iterable
-import cv2
 
 from dqn_agent import DQNAgent
 from tetris import Tetris
@@ -13,13 +12,15 @@ from keras.engine.saving import save_model
 class AgentConf:
     def __init__(self):
         self.n_neurons = [32, 32]
+        self.batch_size = 512
         self.activations = ['relu', 'relu', 'linear']
         self.episodes = 2000
-        self.epsilon_stop_episode = 1500
+        self.epsilon = 1.0
+        self.epsilon_min = 0.0
+        self.epsilon_stop_episode = 1600
         self.mem_size = 25000
         self.discount = 0.95
-        self.replay_start_size = 5000
-        self.batch_size = 1024
+        self.replay_start_size = 2000
         self.epochs = 1
         self.render_every = None
         self.train_every = 1
@@ -33,13 +34,18 @@ def dqn(ac: AgentConf):
 
     agent = DQNAgent(env.get_state_size(),
                      n_neurons=ac.n_neurons, activations=ac.activations,
-                     epsilon_stop_episode=ac.epsilon_stop_episode, mem_size=ac.mem_size,
-                     discount=ac.discount, replay_start_size=ac.replay_start_size)
+                     epsilon=ac.epsilon, epsilon_min=ac.epsilon_min, epsilon_stop_episode=ac.epsilon_stop_episode,
+                     mem_size=ac.mem_size, discount=ac.discount, replay_start_size=ac.replay_start_size)
 
     timestamp_str = datetime.now().strftime("%Y%m%d-%H%M%S")
-    log_dir = f'logs/tetris-{timestamp_str}-nn={str(ac.n_neurons)}-mem={ac.mem_size}' \
-        f'-bs={ac.batch_size}-e={ac.epochs}'
+    # conf.mem_size = mem_size
+    # conf.epochs = epochs
+    # conf.epsilon_stop_episode = epsilon_stop_episode
+    # conf.discount = discount
+    log_dir = f'logs/tetris-{timestamp_str}-ms{ac.mem_size}-e{ac.epochs}-ese{ac.epsilon_stop_episode}-d{ac.discount}'
     log = CustomTensorBoard(log_dir=log_dir)
+
+    print(f"AGENT_CONF = {log_dir}")
 
     scores = []
 
@@ -90,12 +96,16 @@ def dqn(ac: AgentConf):
 
 
 def enumerate_dqn():
-    for bs in [256, 512, 1024]:
-        for ms in [5000, 10_000, 15_000, 20_000, 25_000]:
-            agent_conf = AgentConf()
-            agent_conf.batch_size = bs
-            agent_conf.mem_size = ms
-            dqn(agent_conf)
+    for mem_size in [10_000, 15_000, 20_000, 25_000]:
+        for epochs in [1, 2, 3]:
+            for epsilon_stop_episode in [1600, 1800, 2000]:
+                for discount in [0.95, 0.97, 0.99]:
+                    conf = AgentConf()
+                    conf.mem_size = mem_size
+                    conf.epochs = epochs
+                    conf.epsilon_stop_episode = epsilon_stop_episode
+                    conf.discount = discount
+                    dqn(conf)
 
 
 if __name__ == "__main__":
