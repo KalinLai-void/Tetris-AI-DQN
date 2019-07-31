@@ -14,6 +14,8 @@ python interactive.py
 ```bash
 sudo apt install libgtk2.0-dev pkg-config
 # https://stackoverflow.com/a/14656610/5066426
+
+conda create --name tf37 python=3.7 tensorflow
 conda remove opencv
 conda install -c conda-forge opencv=4.1.0
 ```
@@ -21,8 +23,7 @@ conda install -c conda-forge opencv=4.1.0
 
 First 10000 points, after training.
 
-![Demo - First 10000 points](./demo.gif)
-
+`![Demo - First 10000 points](_img/demo.gif)`
 
 ## How does it work
 
@@ -97,7 +98,7 @@ For the training, the replay queue had size 20000, with a random sample of 512 s
 
 For 2000 episodes, with epsilon ending at 1500, the agent kept going for too long around episode 1460, so it had to be terminated. Here is a chart with the maximum score every 50 episodes, until episode 1450:
 
-![results](./results.svg)
+![results](_img/results.svg)
 
 Note: Decreasing the `epsilon_end_episode` could make the agent achieve better results in a smaller number of episodes.
 
@@ -111,3 +112,85 @@ Note: Decreasing the `epsilon_end_episode` could make the agent achieve better r
 
 #### Tetris
 - Code My Road - https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/ (uses evolutionary strategies)
+
+### Debug notes
+
+```
+    (x, rotation) -> State
+    State = [lines, holes, total_bumpiness, sum_height]
+
+
+`env.get_next_states()` gives
+    ( 0,   0) = {list} <class 'list'>: [0, 0, 5, 4]
+    ( 1,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 2,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 3,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 4,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 5,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 6,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 7,   0) = {list} <class 'list'>: [0, 0, 6, 4]
+    ( 8,   0) = {list} <class 'list'>: [0, 0, 3, 4]
+    ( 0,  90) = {list} <class 'list'>: [0, 2, 2, 6]
+    ( 1,  90) = {list} <class 'list'>: [0, 2, 4, 6]
+    ( 2,  90) = {list} <class 'list'>: [0, 2, 4, 6]
+    ( 3,  90) = {list} <class 'list'>: [0, 2, 4, 6]
+    ( 4,  90) = {list} <class 'list'>: [0, 2, 4, 6]
+    ( 5,  90) = {list} <class 'list'>: [0, 2, 4, 6]
+    ( 6,  90) = {list} <class 'list'>: [0, 2, 4, 6]
+    ( 7,  90) = {list} <class 'list'>: [0, 2, 2, 6]
+    (-1, 180) = {list} <class 'list'>: [0, 2, 3, 6]
+    ( 0, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 1, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 2, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 3, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 4, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 5, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 6, 180) = {list} <class 'list'>: [0, 2, 6, 6]
+    ( 7, 180) = {list} <class 'list'>: [0, 2, 3, 6]
+    ( 0, 270) = {list} <class 'list'>: [0, 0, 2, 4]
+    ( 1, 270) = {list} <class 'list'>: [0, 0, 4, 4]
+    ( 2, 270) = {list} <class 'list'>: [0, 0, 4, 4]
+    ( 3, 270) = {list} <class 'list'>: [0, 0, 4, 4]
+    ( 4, 270) = {list} <class 'list'>: [0, 0, 4, 4]
+    ( 5, 270) = {list} <class 'list'>: [0, 0, 4, 4]
+    ( 6, 270) = {list} <class 'list'>: [0, 0, 4, 4]
+    ( 7, 270) = {list} <class 'list'>: [0, 0, 3, 4]
+
+`next_states.values`
+dict_values([
+    [0, 0, 5, 4],
+    [0, 0, 6, 4],
+    [0, 0, 6, 4],
+    [0, 0, 6, 4],
+    [0, 0, 6, 4],
+    [0, 0, 6, 4],
+    [0, 0, 6, 4],
+    [0, 0, 6, 4],
+    [0, 0, 3, 4],
+    [0, 2, 2, 6],
+    [0, 2, 4, 6],
+    [0, 2, 4, 6],
+    [0, 2, 4, 6],
+    [0, 2, 4, 6],
+    [0, 2, 4, 6],
+    [0, 2, 4, 6],
+    [0, 2, 2, 6],
+    [0, 2, 3, 6],
+    [0, 2, 6, 6],
+    [0, 2, 6, 6],
+    [0, 2, 6, 6],
+    [0, 2, 6, 6],
+    [0, 2, 6, 6],
+    [0, 2, 6, 6],
+    [0, 2, 6, 6],
+    [0, 2, 3, 6],
+    [0, 0, 2, 4],
+    [0, 0, 4, 4],
+    [0, 0, 4, 4],
+    [0, 0, 4, 4],
+    [0, 0, 4, 4],
+    [0, 0, 4, 4],
+    [0, 0, 4, 4],
+    [0, 0, 3, 4]
+])
+```

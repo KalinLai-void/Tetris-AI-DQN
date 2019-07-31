@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 import itertools
 from PIL import Image
-from time import sleep
 
 
 # Tetris game class
@@ -185,7 +184,7 @@ class Tetris:
         return len(lines_to_clear), board
 
     def _number_of_holes(self, board):
-        """Number of holes in the board (empty sqquare with at least one block above it)"""
+        """Number of holes in the board (empty square with at least one block above it)"""
         holes = 0
 
         for col in zip(*board):

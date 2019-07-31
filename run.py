@@ -1,3 +1,4 @@
+import types
 from typing import Optional, Iterable
 
 import cv2
@@ -8,46 +9,51 @@ from datetime import datetime
 from statistics import mean
 from logs import CustomTensorBoard
 from tqdm import tqdm
+from keras.engine.saving import save_model
+
+agent_conf = types.SimpleNamespace()
+agent_conf.n_neurons = [32, 32]
+agent_conf.activations = ['relu', 'relu', 'linear']
+agent_conf.episodes = 2000
+agent_conf.epsilon_stop_episode = 1500
+agent_conf.mem_size = 15000
+agent_conf.discount = 0.95
+agent_conf.replay_start_size = 2500
+agent_conf.batch_size = 512
+agent_conf.epochs = 1
+agent_conf.render_every = None
+agent_conf.train_every = 1
+agent_conf.log_every = 10
+agent_conf.max_steps: Optional[int] = 1000
 
 
 # Run dqn with Tetris
 def dqn():
     env = Tetris()
-    episodes = 2000
-    max_steps: Optional[int] = None
-    epsilon_stop_episode = 1500
-    mem_size = 20000
-    discount = 0.95
-    batch_size = 512
-    epochs = 1
-    log_every = 50
-    replay_start_size = 2000
-    train_every = 1
-    n_neurons = [32, 32]
-    render_every = 20
-    activations = ['relu', 'relu', 'linear']
 
     agent = DQNAgent(env.get_state_size(),
-                     n_neurons=n_neurons, activations=activations,
-                     epsilon_stop_episode=epsilon_stop_episode, mem_size=mem_size,
-                     discount=discount, replay_start_size=replay_start_size)
+                     n_neurons=agent_conf.n_neurons, activations=agent_conf.activations,
+                     epsilon_stop_episode=agent_conf.epsilon_stop_episode, mem_size=agent_conf.mem_size,
+                     discount=agent_conf.discount, replay_start_size=agent_conf.replay_start_size)
 
-    log_dir = f'logs/tetris-nn={str(n_neurons)}-mem={mem_size}-bs={batch_size}-e={epochs}-{datetime.now().strftime("%Y%m%d-%H%M%S")}'
+    timestamp_str = datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = f'logs/tetris-{timestamp_str}-nn={str(agent_conf.n_neurons)}-mem={agent_conf.mem_size}' \
+        f'-bs={agent_conf.batch_size}-e={agent_conf.epochs}'
     log = CustomTensorBoard(log_dir=log_dir)
 
     scores = []
 
-    episodes_prime: Iterable[int] = tqdm(range(episodes))
-    for episode in episodes_prime:
+    episodes_wrapped: Iterable[int] = tqdm(range(agent_conf.episodes))
+    for episode in episodes_wrapped:
         current_state = env.reset()
         done = False
         steps = 0
 
         # update render flag
-        render = True if render_every and episode % render_every == 0 else False
+        render = True if agent_conf.render_every and episode % agent_conf.render_every == 0 else False
 
         # game
-        while not done and (not max_steps or steps < max_steps):
+        while not done and (not agent_conf.max_steps or steps < agent_conf.max_steps):
             next_states = env.get_next_states()
             best_state = agent.best_state(next_states.values())
 
@@ -64,27 +70,26 @@ def dqn():
             current_state = next_states[best_action]
             steps += 1
 
-        # just return socre
+        # just return score
         scores.append(env.get_game_score())
 
         # train
-        if episode % train_every == 0:
-            n = len(agent.memory)
-            print(f" agent.memory.len: {n}")
-            agent.train(batch_size=batch_size, epochs=epochs)
+        if episode % agent_conf.train_every == 0:
+            # n = len(agent.memory)
+            # print(f" agent.memory.len: {n}")
+            agent.train(batch_size=agent_conf.batch_size, epochs=agent_conf.epochs)
 
         # logs
-        if log_every and episode and episode % log_every == 0:
-            avg_score = mean(scores[-log_every:])
-            min_score = min(scores[-log_every:])
-            max_score = max(scores[-log_every:])
-
+        if agent_conf.log_every and episode and episode % agent_conf.log_every == 0:
+            avg_score = mean(scores[-agent_conf.log_every:])
+            min_score = min(scores[-agent_conf.log_every:])
+            max_score = max(scores[-agent_conf.log_every:])
             log.log(episode, avg_score=avg_score, min_score=min_score, max_score=max_score)
     # save_model
-    agent.model.save(f'{log_dir}/model.hdf', overwrite=False, include_optimizer=True)
+    save_model(agent.model, f'{log_dir}/model.hdf', overwrite=True, include_optimizer=True)
 
 
 if __name__ == "__main__":
     dqn()
     cv2.destroyAllWindows()
-    cv2.waitKey(0)
+    exit(0)
