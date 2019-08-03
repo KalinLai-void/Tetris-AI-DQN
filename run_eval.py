@@ -49,7 +49,8 @@ def run_eval(dir_name):
 
 def enumerate_run_eval():
     dirs = [
-        'tetris-20190731-221411-nn=[32, 32]-mem=25000-bs=512-e=1',
+        # 'tetris-20190731-221411-nn=[32, 32]-mem=25000-bs=512-e=1',
+        'tetris-20190802-002631-ms20000-e1-ese1600-d0.99'
     ]
     for d in dirs:
         print(f"Evaluating dir '{d}'")
