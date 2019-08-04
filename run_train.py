@@ -17,9 +17,9 @@ class AgentConf:
         self.episodes = 2000
         self.epsilon = 1.0
         self.epsilon_min = 0.0
-        self.epsilon_stop_episode = 1600
+        self.epsilon_stop_episode = 2000
         self.mem_size = 25000
-        self.discount = 0.95
+        self.discount = 0.99
         self.replay_start_size = 2000
         self.epochs = 1
         self.render_every = None
@@ -94,20 +94,22 @@ def dqn(ac: AgentConf):
     # save_model
     save_model(agent.model, f'{log_dir}/model.hdf', overwrite=True, include_optimizer=True)
 
-
-def enumerate_dqn():
-    for mem_size in [10_000, 15_000, 20_000, 25_000]:
-        for epochs in [1, 2, 3]:
-            for epsilon_stop_episode in [1600, 1800, 2000]:
-                for discount in [0.95, 0.97, 0.99]:
-                    conf = AgentConf()
-                    conf.mem_size = mem_size
-                    conf.epochs = epochs
-                    conf.epsilon_stop_episode = epsilon_stop_episode
-                    conf.discount = discount
-                    dqn(conf)
+# def enumerate_dqn():
+#     """ Enumerate hyper-params to find the best combination """
+#     for mem_size in [10_000, 15_000, 20_000, 25_000]:
+#         for epochs in [1, 2, 3]:
+#             for epsilon_stop_episode in [1600, 1800, 2000]:
+#                 for discount in [0.95, 0.97, 0.99]:
+#                     conf = AgentConf()
+#                     conf.mem_size = mem_size
+#                     conf.epochs = epochs
+#                     conf.epsilon_stop_episode = epsilon_stop_episode
+#                     conf.discount = discount
+#                     dqn(conf)
 
 
 if __name__ == "__main__":
-    enumerate_dqn()
+    conf = AgentConf()
+    dqn(conf)
+    # to avoid jump to console when run under IDE
     exit(0)
