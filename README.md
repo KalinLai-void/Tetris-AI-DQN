@@ -2,24 +2,50 @@
 
 A bot that plays [tetris](https://en.wikipedia.org/wiki/Tetris) using deep reinforcement learning.
 
-## Interactive mode
-
-Classic style, where the user may control pieces with the keyboard.
-```bash
-python interactive.py
-```
-
-## Demo
+## Installation
 
 ```bash
 sudo apt install libgtk2.0-dev pkg-config
 # https://stackoverflow.com/a/14656610/5066426
 
-conda create --name tf37 python=3.7 tensorflow
-conda remove opencv
+conda create --name tf37 python=3.7
 conda install -c conda-forge opencv=4.1.0
-conda install keras pillow tqdm
+conda install tensorflow-gpu keras pillow tqdm tensorboard
+
+conda activate tf37
 ```
+
+## How to use
+
+This can be run in three modes: interactive, training and evaluating.
+
+### Interactive mode
+
+Obviously requires no training, just allows to play Tetris yourself as usual controlling pieces with the keyboard 
+and the code itself shows how to use the model as well.
+```bash
+python run_interactive.py
+```
+
+### Train and evaluate
+
+To train the model do this
+```bash
+python run_train.py
+```
+After the training process finished a subdir in `./logs` will be created. There will be 2 things inside: logs for the
+[`Tensorboard`](https://www.tensorflow.org/guide/summaries_and_tensorboard) and `model.hdf` - the serialized form of
+the model trained. 
+
+After that you can run the agent against with the model
+
+```bash
+python run_eval.py
+```
+This takes the most recent subdirectory in `./logs`, loads the model from there and runs visual simulation of the agent.
+The results usually vary from run to run, so some patience required.
+
+## Demo
 
 First 10000 points, after training.
 

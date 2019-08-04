@@ -50,12 +50,13 @@ def run_eval(dir_name: str, episodes: int = 100, render: bool = False) -> List[i
 
 
 def enumerate_run_eval(episodes: int = 128, render: bool = False):
-    # dirs = [name for name in os.listdir('logs') if os.path.isdir(os.path.join('logs', name))]
-    # dirs.sort(reverse=True)  # the most recent first
-    dirs = [
-        'tetris-20190802-221032-ms25000-e1-ese2000-d0.99',
-        'tetris-20190802-033219-ms20000-e1-ese2000-d0.95',
-    ]
+    dirs = [name for name in os.listdir('logs') if os.path.isdir(os.path.join('logs', name))]
+    dirs.sort(reverse=True)
+    dirs = [dirs[0]]  # take the most recent model
+    # dirs = [
+    #     'tetris-20190802-221032-ms25000-e1-ese2000-d0.99',
+    #     'tetris-20190802-033219-ms20000-e1-ese2000-d0.95',
+    # ]
     max_scores = []
     for d in dirs:
         print(f"Evaluating dir '{d}'")
