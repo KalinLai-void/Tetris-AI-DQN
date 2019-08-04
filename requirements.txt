@@ -1,7 +1,6 @@
-tensorflow
+tensorflow-gpu
 tensorboard
-Keras
-opencv-python
-numpy
-Pillow
+keras
+opencv=4.1.0
+pillow
 tqdm

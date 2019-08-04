@@ -8,12 +8,18 @@ A bot that plays [tetris](https://en.wikipedia.org/wiki/Tetris) using deep reinf
 sudo apt install libgtk2.0-dev pkg-config
 # https://stackoverflow.com/a/14656610/5066426
 
-conda create --name tf37 python=3.7
+conda create --name py37tf python=3.7
 conda install -c conda-forge opencv=4.1.0
 conda install tensorflow-gpu keras pillow tqdm tensorboard
 
-conda activate tf37
+conda activate py37tf
 ```
+OR
+```bash
+conda create --name py37tf --file requirements.txt
+conda activate py37tf
+```
+
 
 ## How to use
 
