@@ -1,3 +1,5 @@
+from typing import ValuesView, List, Optional
+
 from keras import Model
 from keras.models import Sequential
 from keras.layers import Dense
@@ -76,7 +78,7 @@ class DQNAgent:
         """Random score for a certain action"""
         return random.random()
 
-    def predict_value(self, state) -> float:
+    def predict_value(self, state: np.ndarray) -> float:
         """Predicts the score for a certain state"""
         return self.model.predict(state)[0]
 
@@ -88,21 +90,19 @@ class DQNAgent:
         else:
             return self.predict_value(state)
 
-    def best_state(self, states):
+    def best_state(self, states: ValuesView[List[int]]) -> List[int]:
         """Returns the best state for a given collection of states"""
-        max_value = None
-        best_state = None
-
         if random.random() <= self.epsilon:
             return random.choice(list(states))
         else:
+            max_value: Optional[float] = None
+            best_state: Optional[List[int]] = None
             for state in states:
                 # ask the neural network about the best value
                 value = self.predict_value(np.reshape(state, [1, self.state_size]))
                 if not max_value or value > max_value:
                     max_value = value
                     best_state = state
-
         return best_state
 
     def train(self, batch_size=32, epochs=3):

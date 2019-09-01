@@ -57,6 +57,7 @@ def enumerate_run_eval(episodes: int = 128, render: bool = False):
     #     'tetris-20190802-221032-ms25000-e1-ese2000-d0.99',
     #     'tetris-20190802-033219-ms20000-e1-ese2000-d0.95',
     # ]
+    dirs = ['tetris-20190802-221032-ms25000-e1-ese2000-d0.99']
     max_scores = []
     for d in dirs:
         print(f"Evaluating dir '{d}'")

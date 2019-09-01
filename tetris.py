@@ -227,7 +227,7 @@ class Tetris:
 
         return sum_height, max_height, min_height
 
-    def _get_board_props(self, board):
+    def _get_board_props(self, board) -> List[int]:
         """Get properties of the board"""
         lines, board = self._clear_lines(board)
         holes = self._number_of_holes(board)

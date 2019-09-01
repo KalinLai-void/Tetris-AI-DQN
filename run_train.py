@@ -29,37 +29,38 @@ class AgentConf:
 
 
 # Run dqn with Tetris
-def dqn(ac: AgentConf):
+# noinspection PyShadowingNames
+def dqn(conf: AgentConf):
     env = Tetris()
 
     agent = DQNAgent(env.get_state_size(),
-                     n_neurons=ac.n_neurons, activations=ac.activations,
-                     epsilon=ac.epsilon, epsilon_min=ac.epsilon_min, epsilon_stop_episode=ac.epsilon_stop_episode,
-                     mem_size=ac.mem_size, discount=ac.discount, replay_start_size=ac.replay_start_size)
+                     n_neurons=conf.n_neurons, activations=conf.activations,
+                     epsilon=conf.epsilon, epsilon_min=conf.epsilon_min, epsilon_stop_episode=conf.epsilon_stop_episode,
+                     mem_size=conf.mem_size, discount=conf.discount, replay_start_size=conf.replay_start_size)
 
     timestamp_str = datetime.now().strftime("%Y%m%d-%H%M%S")
     # conf.mem_size = mem_size
     # conf.epochs = epochs
     # conf.epsilon_stop_episode = epsilon_stop_episode
     # conf.discount = discount
-    log_dir = f'logs/tetris-{timestamp_str}-ms{ac.mem_size}-e{ac.epochs}-ese{ac.epsilon_stop_episode}-d{ac.discount}'
+    log_dir = f'logs/tetris-{timestamp_str}-ms{conf.mem_size}-e{conf.epochs}-ese{conf.epsilon_stop_episode}-d{conf.discount}'
     log = CustomTensorBoard(log_dir=log_dir)
 
     print(f"AGENT_CONF = {log_dir}")
 
     scores = []
 
-    episodes_wrapped: Iterable[int] = tqdm(range(ac.episodes))
+    episodes_wrapped: Iterable[int] = tqdm(range(conf.episodes))
     for episode in episodes_wrapped:
         current_state = env.reset()
         done = False
         steps = 0
 
         # update render flag
-        render = True if ac.render_every and episode % ac.render_every == 0 else False
+        render = True if conf.render_every and episode % conf.render_every == 0 else False
 
         # game
-        while not done and (not ac.max_steps or steps < ac.max_steps):
+        while not done and (not conf.max_steps or steps < conf.max_steps):
             next_states = env.get_next_states()
             best_state = agent.best_state(next_states.values())
 
@@ -80,16 +81,16 @@ def dqn(ac: AgentConf):
         scores.append(env.get_game_score())
 
         # train
-        if episode % ac.train_every == 0:
+        if episode % conf.train_every == 0:
             # n = len(agent.memory)
             # print(f" agent.memory.len: {n}")
-            agent.train(batch_size=ac.batch_size, epochs=ac.epochs)
+            agent.train(batch_size=conf.batch_size, epochs=conf.epochs)
 
         # logs
-        if ac.log_every and episode and episode % ac.log_every == 0:
-            avg_score = mean(scores[-ac.log_every:])
-            min_score = min(scores[-ac.log_every:])
-            max_score = max(scores[-ac.log_every:])
+        if conf.log_every and episode and episode % conf.log_every == 0:
+            avg_score = mean(scores[-conf.log_every:])
+            min_score = min(scores[-conf.log_every:])
+            max_score = max(scores[-conf.log_every:])
             log.log(episode, avg_score=avg_score, min_score=min_score, max_score=max_score)
     # save_model
     save_model(agent.model, f'{log_dir}/model.hdf', overwrite=True, include_optimizer=True)
