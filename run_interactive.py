@@ -10,21 +10,21 @@ def run_interactive():
 
     iteration = 0
     while True:
-        k = cv2.waitKey(100)  # 10 milliseconds
+        k = cv2.waitKeyEx(100)  # 10 milliseconds
         env.render(wait_key=False)
         if k == 27:
-            print('ESC')
+            print("ESC")
             break
-        elif k == 81:  # left
+        elif k == 2424832:  # left
             env.move([-1, 0], 0)
             env.render(wait_key=False)
-        elif k == 83:  # right
+        elif k == 2555904:  # right
             env.move([+1, 0], 0)
             env.render(wait_key=False)
-        elif k == 84:  # down
+        elif k == 2621440:  # down
             env.move([0, +1], 0)
             env.render(wait_key=False)
-        elif k == 82:  # up
+        elif k == 2490368:  # up
             # clockwise rotation
             env.move([0, 0], -90)
             env.render(wait_key=False)

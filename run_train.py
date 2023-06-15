@@ -6,14 +6,14 @@ from datetime import datetime
 from statistics import mean
 from logs import CustomTensorBoard
 from tqdm import tqdm
-from keras.engine.saving import save_model
-
+#from keras.engine.saving import save_model
+from keras.models import save_model
 
 class AgentConf:
     def __init__(self):
         self.n_neurons = [32, 32]
         self.batch_size = 512
-        self.activations = ['relu', 'relu', 'linear']
+        self.activations = ["relu", "relu", "linear"]
         self.episodes = 2000
         self.epsilon = 1.0
         self.epsilon_min = 0.0
@@ -22,7 +22,7 @@ class AgentConf:
         self.discount = 0.99
         self.replay_start_size = 2000
         self.epochs = 1
-        self.render_every = None
+        self.render_every = 50
         self.train_every = 1
         self.log_every = 10
         self.max_steps: Optional[int] = 10000
@@ -43,7 +43,7 @@ def dqn(conf: AgentConf):
     # conf.epochs = epochs
     # conf.epsilon_stop_episode = epsilon_stop_episode
     # conf.discount = discount
-    log_dir = f'logs/tetris-{timestamp_str}-ms{conf.mem_size}-e{conf.epochs}-ese{conf.epsilon_stop_episode}-d{conf.discount}'
+    log_dir = f"logs/tetris-{timestamp_str}-ms{conf.mem_size}-e{conf.epochs}-ese{conf.epsilon_stop_episode}-d{conf.discount}"
     log = CustomTensorBoard(log_dir=log_dir)
 
     print(f"AGENT_CONF = {log_dir}")
@@ -93,7 +93,7 @@ def dqn(conf: AgentConf):
             max_score = max(scores[-conf.log_every:])
             log.log(episode, avg_score=avg_score, min_score=min_score, max_score=max_score)
     # save_model
-    save_model(agent.model, f'{log_dir}/model.hdf', overwrite=True, include_optimizer=True)
+    save_model(agent.model, f"{log_dir}/model.hdf", overwrite=True, include_optimizer=True)
 
 # def enumerate_dqn():
 #     """ Enumerate hyper-params to find the best combination """

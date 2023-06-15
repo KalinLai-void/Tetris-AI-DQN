@@ -2,25 +2,6 @@
 
 A bot that plays [tetris](https://en.wikipedia.org/wiki/Tetris) using deep reinforcement learning.
 
-## Installation
-
-```bash
-sudo apt install libgtk2.0-dev pkg-config
-# https://stackoverflow.com/a/14656610/5066426
-
-conda create --name py37tf python=3.7
-conda install -c conda-forge opencv=4.1.0
-conda install tensorflow-gpu keras pillow tqdm tensorboard
-
-conda activate py37tf
-```
-OR
-```bash
-conda create --name py37tf --file requirements.txt
-conda activate py37tf
-```
-
-
 ## How to use
 
 This can be run in three modes: interactive, training and evaluating.
@@ -55,7 +36,11 @@ The results usually vary from run to run, so some patience required.
 
 First 10000 points, after training.
 
-`![Demo - First 10000 points](_img/demo.gif)`
+- Origin
+![Demo - First 10000 points](_img/Origin/demo.gif)
+
+- UI
+![Demo - UI](_img/demo-ui.gif)
 
 ## How does it work
 
@@ -118,19 +103,19 @@ For the training, the replay queue had size 20000, with a random sample of 512 s
 
 #### Requirements
 
-- Tensorflow (`tensorflow-gpu==1.14.0`, CPU version can be used too)
-- Tensorboard (`tensorboard==1.14.0`)
-- Keras (`Keras==2.2.4`)
-- Opencv-python (`opencv-python==4.1.0.25`)
-- Numpy (`numpy==1.16.4`)
-- Pillow (`Pillow==5.4.1`)
-- Tqdm (`tqdm==4.31.1`)
+- Tensorflow (`tensorflow==2.12.0`)
+- Tensorboard (`tensorboard==2.12.0`)
+- Keras (`Keras==2.12.0`)
+- Opencv-python (`opencv-python==4.7.0.72`)
+- - Numpy (`numpy==1.23.5`)
+- Pillow(`Pillow==9.4.0 `)
+- Tqdm (`tqdm==4.65.0`)
+- Pandas==1.5.3 (`Pandas==1.5.3`)
+- Matplotlib==3.7.1 (`Matplotlib==3.7.1`)
 
 ## Results
 
-For 2000 episodes, with epsilon ending at 1500, the agent kept going for too long around episode 1460, so it had to be terminated. Here is a chart with the maximum score every 50 episodes, until episode 1450:
-
-![results](_img/results.svg)
+![results](_img/Training Avg. Score.png)
 
 Note: Decreasing the `epsilon_end_episode` could make the agent achieve better results in a smaller number of episodes.
 
@@ -144,85 +129,3 @@ Note: Decreasing the `epsilon_end_episode` could make the agent achieve better r
 
 #### Tetris
 - Code My Road - https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/ (uses evolutionary strategies)
-
-### Debug notes
-
-```
-    (x, rotation) -> State
-    State = [lines, holes, total_bumpiness, sum_height]
-
-
-`env.get_next_states()` gives
-    ( 0,   0) = {list} <class 'list'>: [0, 0, 5, 4]
-    ( 1,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 2,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 3,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 4,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 5,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 6,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 7,   0) = {list} <class 'list'>: [0, 0, 6, 4]
-    ( 8,   0) = {list} <class 'list'>: [0, 0, 3, 4]
-    ( 0,  90) = {list} <class 'list'>: [0, 2, 2, 6]
-    ( 1,  90) = {list} <class 'list'>: [0, 2, 4, 6]
-    ( 2,  90) = {list} <class 'list'>: [0, 2, 4, 6]
-    ( 3,  90) = {list} <class 'list'>: [0, 2, 4, 6]
-    ( 4,  90) = {list} <class 'list'>: [0, 2, 4, 6]
-    ( 5,  90) = {list} <class 'list'>: [0, 2, 4, 6]
-    ( 6,  90) = {list} <class 'list'>: [0, 2, 4, 6]
-    ( 7,  90) = {list} <class 'list'>: [0, 2, 2, 6]
-    (-1, 180) = {list} <class 'list'>: [0, 2, 3, 6]
-    ( 0, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 1, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 2, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 3, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 4, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 5, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 6, 180) = {list} <class 'list'>: [0, 2, 6, 6]
-    ( 7, 180) = {list} <class 'list'>: [0, 2, 3, 6]
-    ( 0, 270) = {list} <class 'list'>: [0, 0, 2, 4]
-    ( 1, 270) = {list} <class 'list'>: [0, 0, 4, 4]
-    ( 2, 270) = {list} <class 'list'>: [0, 0, 4, 4]
-    ( 3, 270) = {list} <class 'list'>: [0, 0, 4, 4]
-    ( 4, 270) = {list} <class 'list'>: [0, 0, 4, 4]
-    ( 5, 270) = {list} <class 'list'>: [0, 0, 4, 4]
-    ( 6, 270) = {list} <class 'list'>: [0, 0, 4, 4]
-    ( 7, 270) = {list} <class 'list'>: [0, 0, 3, 4]
-
-`next_states.values`
-dict_values([
-    [0, 0, 5, 4],
-    [0, 0, 6, 4],
-    [0, 0, 6, 4],
-    [0, 0, 6, 4],
-    [0, 0, 6, 4],
-    [0, 0, 6, 4],
-    [0, 0, 6, 4],
-    [0, 0, 6, 4],
-    [0, 0, 3, 4],
-    [0, 2, 2, 6],
-    [0, 2, 4, 6],
-    [0, 2, 4, 6],
-    [0, 2, 4, 6],
-    [0, 2, 4, 6],
-    [0, 2, 4, 6],
-    [0, 2, 4, 6],
-    [0, 2, 2, 6],
-    [0, 2, 3, 6],
-    [0, 2, 6, 6],
-    [0, 2, 6, 6],
-    [0, 2, 6, 6],
-    [0, 2, 6, 6],
-    [0, 2, 6, 6],
-    [0, 2, 6, 6],
-    [0, 2, 6, 6],
-    [0, 2, 3, 6],
-    [0, 0, 2, 4],
-    [0, 0, 4, 4],
-    [0, 0, 4, 4],
-    [0, 0, 4, 4],
-    [0, 0, 4, 4],
-    [0, 0, 4, 4],
-    [0, 0, 4, 4],
-    [0, 0, 3, 4]
-])
-```

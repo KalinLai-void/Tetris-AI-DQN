@@ -4,8 +4,11 @@ from typing import Dict, List, Tuple
 import cv2
 import numpy as np
 import itertools
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
+import os
 
+font = ImageFont.truetype(f"Assets/Font/Cubic_11_1.013_R.ttf", 18, encoding="utf-8")
+font_title = ImageFont.truetype(f"Assets/Font/Cubic_11_1.013_R.ttf", 20, encoding="utf-8")
 
 # Tetris game class
 # noinspection PyMethodMayBeStatic
@@ -61,13 +64,47 @@ class Tetris:
             90: [(1, 0), (2, 0), (1, 1), (2, 1)],
             180: [(1, 0), (2, 0), (1, 1), (2, 1)],
             270: [(1, 0), (2, 0), (1, 1), (2, 1)],
-        }
+        },
+        7: None, # Empty
     }
 
     COLORS = {
         0: (255, 255, 255),
-        1: (247, 64, 99),
-        2: (0, 167, 247),
+        1: (247, 64, 99), # MAP_BLOCK
+        2: (0, 167, 247), # MAP_PLAYER
+    }
+
+    ASSETS_PATH = f"Assets/"
+    ASSETS = {
+        "BG": os.path.join(ASSETS_PATH,"bg.PNG"),
+        "board_BG": os.path.join(ASSETS_PATH, "board_bg.PNG"),
+        "board_grid": os.path.join(ASSETS_PATH, "board_grid.PNG"),
+        "board_border": os.path.join(ASSETS_PATH, "board_border.PNG"),
+        "board_info": os.path.join(ASSETS_PATH, "board_info.PNG"),
+        "decorate": os.path.join(ASSETS_PATH, "decorate.PNG")
+    }
+
+    BLOCK_ASSETS_PATH = os.path.join(ASSETS_PATH, "Blocks") 
+    MAP_BLOCK_IMG = os.path.join(BLOCK_ASSETS_PATH, "blockMap_1.PNG")
+    BLOCK_ASSETS = {
+        0: os.path.join(BLOCK_ASSETS_PATH, "blockI_1.PNG"), # I
+        1: os.path.join(BLOCK_ASSETS_PATH, "blockT_1.PNG"), # T
+        2: os.path.join(BLOCK_ASSETS_PATH, "blockL_1.PNG"), # L
+        3: os.path.join(BLOCK_ASSETS_PATH, "blockJ_1.PNG"), # J
+        4: os.path.join(BLOCK_ASSETS_PATH, "blockZ_1.PNG"), # Z
+        5: os.path.join(BLOCK_ASSETS_PATH, "blockS_1.PNG"), # S
+        6: os.path.join(BLOCK_ASSETS_PATH, "blockO_1.PNG"), # O
+        7: None, # Empty
+    }
+    COMPLETED_BLOCK_ASSETS = {
+        0: os.path.join(BLOCK_ASSETS_PATH, "blockI.PNG"), # I
+        1: os.path.join(BLOCK_ASSETS_PATH, "blockT.PNG"), # T
+        2: os.path.join(BLOCK_ASSETS_PATH, "blockL.PNG"), # L
+        3: os.path.join(BLOCK_ASSETS_PATH, "blockJ.PNG"), # J
+        4: os.path.join(BLOCK_ASSETS_PATH, "blockZ.PNG"), # Z
+        5: os.path.join(BLOCK_ASSETS_PATH, "blockS.PNG"), # S
+        6: os.path.join(BLOCK_ASSETS_PATH, "blockO.PNG"), # O
+        7: None, # Empty
     }
 
     def __init__(self):
@@ -76,22 +113,25 @@ class Tetris:
         self.current_pos = [3, 0]
         self.current_rotation = 0
         self.board = []
+        self.board_label = []
         self.bag = []
         self.next_piece = None
         self.score = 0
+        self.lines = 0
 
         self.reset()
 
     def reset(self):
         """Resets the game, returning the current state"""
         self.board = [[0] * Tetris.BOARD_WIDTH for _ in range(Tetris.BOARD_HEIGHT)]
+        self.board_label = [[-1] * Tetris.BOARD_WIDTH for _ in range(Tetris.BOARD_HEIGHT)]
         self.game_over = False
-        self.bag = list(range(len(Tetris.TETROMINOS)))
+        self.bag = list(range(len(Tetris.TETROMINOS) - 1))
         random.shuffle(self.bag)
         self.next_piece = self.bag.pop()
         self._new_round(piece_fall=False)
         self.score = 0
-        return self._get_board_props(self.board)
+        return self._get_board_props(self.board, self.board_label)
 
     def _get_rotated_piece(self, rotation):
         """Returns the current piece, including rotation"""
@@ -104,6 +144,7 @@ class Tetris:
         board = [x[:] for x in self.board]
         for x, y in piece:
             board[y][x] = Tetris.MAP_PLAYER
+            self.board_label[y][x] = list(Tetris.TETROMINOS.keys()).index(self.current_piece)
         return board
 
     def get_game_score(self):
@@ -120,23 +161,26 @@ class Tetris:
         if piece_fall:
             # Update board and calculate score
             piece = self._get_rotated_piece(self.current_rotation)
-            self.board = self._add_piece_to_board(piece, self.current_pos)
-            lines_cleared, self.board = self._clear_lines(self.board)
-            score = 1 + (lines_cleared ** 2) * Tetris.BOARD_WIDTH
+            self.board, self.board_label = self._add_piece_to_board(piece, self.current_pos)
+            lines_cleared, self.board, self.board_label = self._clear_lines(self.board, self.board_label)
+            score = 1 + ((2 ** (lines_cleared - 1)) * Tetris.BOARD_WIDTH if lines_cleared > 0 else 0)
             self.score += score
-
-        # Generate new bag with the pieces
-        if len(self.bag) == 0:
-            self.bag = list(range(len(Tetris.TETROMINOS)))
-            random.shuffle(self.bag)
+            self.lines += lines_cleared
 
         self.current_piece = self.next_piece
         self.next_piece = self.bag.pop()
         self.current_pos = [3, 0]
         self.current_rotation = 0
 
+        # Generate new bag with the pieces
+        if len(self.bag) < 3:
+            tmp = list(range(len(Tetris.TETROMINOS) - 1))
+            random.shuffle(tmp)
+            self.bag += tmp
+
         if not self.is_valid_position(self._get_rotated_piece(self.current_rotation), self.current_pos):
             self.game_over = True
+            self.lines = 0
         return score
 
     def is_valid_position(self, piece, pos):
@@ -168,20 +212,24 @@ class Tetris:
     def _add_piece_to_board(self, piece, pos):
         """Place a piece in the board, returning the resulting board"""
         board = [x[:] for x in self.board]
+        board_label = [x[:] for x in self.board_label]
         for x, y in piece:
             board[y + pos[1]][x + pos[0]] = Tetris.MAP_BLOCK
-        return board
+            board_label[y + pos[1]][x + pos[0]] = list(Tetris.TETROMINOS.keys()).index(self.current_piece)
+        return board, board_label
 
-    def _clear_lines(self, board):
+    def _clear_lines(self, board, board_label):
         """Clears completed lines in a board"""
         # Check if lines can be cleared
         lines_to_clear = [index for index, row in enumerate(board) if sum(row) == Tetris.BOARD_WIDTH]
         if lines_to_clear:
             board = [row for index, row in enumerate(board) if index not in lines_to_clear]
+            board_label = [row for index, row in enumerate(board_label) if index not in lines_to_clear]
             # Add new lines at the top
             for _ in lines_to_clear:
                 board.insert(0, [0 for _ in range(Tetris.BOARD_WIDTH)])
-        return len(lines_to_clear), board
+                board_label.insert(0, [0 for _ in range(Tetris.BOARD_WIDTH)])
+        return len(lines_to_clear), board, board_label
 
     def _number_of_holes(self, board):
         """Number of holes in the board (empty square with at least one block above it)"""
@@ -227,9 +275,9 @@ class Tetris:
 
         return sum_height, max_height, min_height
 
-    def _get_board_props(self, board) -> List[int]:
+    def _get_board_props(self, board, board_label) -> List[int]:
         """Get properties of the board"""
-        lines, board = self._clear_lines(board)
+        lines, board, board_label = self._clear_lines(board, board_label)
         holes = self._number_of_holes(board)
         total_bumpiness, max_bumpiness = self._bumpiness(board)
         sum_height, max_height, min_height = self._height(board)
@@ -264,8 +312,8 @@ class Tetris:
 
                 # Valid move
                 if pos[1] >= 0:
-                    board = self._add_piece_to_board(piece, pos)
-                    states[(x, rotation)] = self._get_board_props(board)
+                    board, board_label = self._add_piece_to_board(piece, pos)
+                    states[(x, rotation)] = self._get_board_props(board, board_label)
 
         return states
 
@@ -320,15 +368,93 @@ class Tetris:
         img = [Tetris.COLORS[p] for row in self._get_complete_board() for p in row]
         img = np.array(img).reshape((Tetris.BOARD_HEIGHT, Tetris.BOARD_WIDTH, 3)).astype(np.uint8)
         img = img[..., ::-1]  # Convert RRG to BGR (used by cv2)
-        img = Image.fromarray(img, 'RGB')
-        img = img.resize((Tetris.BOARD_WIDTH * 25, Tetris.BOARD_HEIGHT * 25))
-        img = np.array(img)
-        cv2.putText(img, str(self.score), (22, 22), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
-        cv2.imshow('image', np.array(img))
+
+        nn_v_img = Image.fromarray(img, "RGB")
+        nn_v_img = nn_v_img.resize((Tetris.BOARD_WIDTH * 27, Tetris.BOARD_HEIGHT * 27))
+        cv2.imshow("NN Visualization", np.array(nn_v_img))
+
+        img = self.renderImg(img)
+        cv2.imshow("Tetris AI - DQN", np.array(img))
+        
         if wait_key:
             # this is needed to render during training
             cv2.waitKey(1)
 
+    def renderImg(self, img):
+        """Import some assets"""
+        # Assets' size is 960x540
+
+        # board assets
+        board_BG_img = Image.open(Tetris.ASSETS["board_BG"]).convert("RGBA")
+        board_grid_img = Image.open(Tetris.ASSETS["board_grid"]).convert("RGBA")
+        board_border_img = Image.open(Tetris.ASSETS["board_border"]).convert("RGBA")
+        board_info_img = Image.open(Tetris.ASSETS["board_info"]).convert("RGBA")
+
+        board_BG_img.paste(board_grid_img, (0, 0), board_grid_img)
+        board_BG_img.paste(board_info_img, (0, 0), board_info_img)
+        board_BG_img.paste(board_border_img, (0, 0), board_border_img)
+
+        # process the blocks in map
+        '''map_block = Image.open(Tetris.MAP_BLOCK_IMG).convert("RGBA")
+        current_block = list(Tetris.TETROMINOS.keys()).index(self.current_piece)
+        current_block_img = Image.open(Tetris.BLOCK_ASSETS[current_block]).convert("RGBA")'''
+        for y in range(Tetris.BOARD_HEIGHT):
+            for x in range(Tetris.BOARD_WIDTH):
+                if self.board_label[y][x] != -1 \
+                    and img[y, x, 0] != Tetris.COLORS[Tetris.MAP_EMPTY][2] \
+                    and img[y, x, 1] != Tetris.COLORS[Tetris.MAP_EMPTY][1] \
+                    and img[y, x, 2] != Tetris.COLORS[Tetris.MAP_EMPTY][0]:
+                    block_img = Image.open(Tetris.BLOCK_ASSETS[self.board_label[y][x]]).convert("RGBA")
+                    board_BG_img.paste(block_img, ((480 - 125) + x * 25, 13 + y * 25), block_img)
+                    # 480 is (the width of the image / 2) (unit: pixels)
+                    # 127 is the center of the image to the board's left border (unit: pixels)
+                    # 13 is the board's top border to the image's top (unit: pixel)
+                    # 25 is the block's size (unit: pixel)
+
+        # show next block
+        next_block = list(Tetris.TETROMINOS.keys()).index(self.next_piece)
+        next_block_img = Image.open(Tetris.COMPLETED_BLOCK_ASSETS[next_block]).convert("RGBA")
+        next_block_img = next_block_img.resize((int(next_block_img.size[0] * 0.6)
+                                                , int(next_block_img.size[1] * 0.6))) # re-scale 0.6 times
+        board_BG_img.paste(next_block_img, 
+                           (480 + 127 + 6 + (61 // 2) - next_block_img.size[0] // 2, 13 + 50), 
+                           next_block_img)
+        # 6 is the board's right board to the right information frame (unit: pixels)
+        # 20 is the "next block frame" to the image's top (unit: pixels)
+        # 61 is the width of "next block frame" (unit: pixels)
+
+        for i in range (1, 3):
+            next_block = list(Tetris.TETROMINOS.keys()).index(self.bag[-i])
+            next_block_img = Image.open(Tetris.COMPLETED_BLOCK_ASSETS[next_block]).convert("RGBA")
+            next_block_img = next_block_img.resize((int(next_block_img.size[0] * 0.6)
+                                                    , int(next_block_img.size[1] * 0.6))) # re-scale 0.6 times
+            board_BG_img.paste(next_block_img, 
+                            (480 + 127 + 6 + (61 // 2) - next_block_img.size[0] // 2, 13 + 50 + 80 * i), 
+                            next_block_img)
+        # 80 is the each blocks interval (unit: pixels)
+
+        # other assets (bg, decoration...)
+        bg_img = Image.open(Tetris.ASSETS["BG"]).convert("RGB")
+        decorate_img = Image.open(Tetris.ASSETS["decorate"]).convert("RGBA")
+        bg_img.paste(decorate_img, (0, 0), decorate_img)
+        bg_img.paste(board_BG_img, (0, 0), board_BG_img)
+        
+        # information frame (text...)
+        draw = ImageDraw.Draw(bg_img)
+        draw.text(tuple((480 + 127 + 61 // 4, 355)), "Lines: \n" + str(self.lines).rjust(6, " "),
+                  tuple((99, 99, 49)), font=font, stroke_width=2, stroke_fill="white")
+        draw.text(tuple((480 + 127 + 61 // 4, 410)), "Score: \n" + str(self.score).rjust(6, " "),
+                  tuple((99, 99, 49)), font=font, stroke_width=2, stroke_fill="white")
+        # 355 and 410 is the "information block frame" to the image's top (unit: pixels)
+
+        draw.text((480 + 127 + 6 + 61 // 8, 13 + 10), "NEXT", 
+                  tuple((99, 99, 49)), font=font_title, stroke_width=2, stroke_fill="white") # the text of next
+        draw.text((480 - 127 - 6 - 76 + 76 // 5, 13 + 10), "HOLD", 
+                  tuple((99, 99, 49)), font=font_title, stroke_width=2, stroke_fill="white") # the text of hold
+        # 76 is the width of "hold block frame" (unit: pixels)
+
+        bg_img = cv2.cvtColor(np.array(bg_img), cv2.COLOR_RGB2BGRA)
+        return bg_img
 
 def window(seq, n=2):
     """Returns a sliding window (of width n) over data from the iterable

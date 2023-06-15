@@ -5,8 +5,9 @@ import cv2
 from dqn_agent import DQNAgent
 from tetris import Tetris
 from run_train import AgentConf
-from keras.engine.saving import load_model
-
+#from keras.engine.saving import load_model
+from keras.models import load_model
+import matplotlib.pyplot as plt
 
 def run_eval(dir_name: str, episodes: int = 100, render: bool = False) -> List[int]:
     agent_conf = AgentConf()
@@ -22,10 +23,10 @@ def run_eval(dir_name: str, episodes: int = 100, render: bool = False) -> List[i
 
     # tetris-20190731-221411-nn=[32, 32]-mem=25000-bs=512-e=1 good
 
-    log_dir = 'logs/' + dir_name
+    log_dir = "logs/" + dir_name
 
     # load_model
-    agent.model = load_model(f'{log_dir}/model.hdf')
+    agent.model = load_model(f"{log_dir}/model.hdf")
     agent.epsilon = 0
     scores = []
     for episode in range(episodes):
@@ -45,19 +46,19 @@ def run_eval(dir_name: str, episodes: int = 100, render: bool = False) -> List[i
             _, done = env.hard_drop([best_action[0], 0], best_action[1], render=render)
         scores.append(env.score)
         # print results at the end of the episode
-        print(f'episode {episode} => {env.score}')
+        print(f"episode {episode} => {env.score}")
     return scores
 
 
 def enumerate_run_eval(episodes: int = 128, render: bool = False):
-    dirs = [name for name in os.listdir('logs') if os.path.isdir(os.path.join('logs', name))]
+    dirs = [name for name in os.listdir("logs") if os.path.isdir(os.path.join("logs", name))]
     dirs.sort(reverse=True)
     dirs = [dirs[0]]  # take the most recent model
     # dirs = [
     #     'tetris-20190802-221032-ms25000-e1-ese2000-d0.99',
     #     'tetris-20190802-033219-ms20000-e1-ese2000-d0.95',
     # ]
-    dirs = ['tetris-20190802-221032-ms25000-e1-ese2000-d0.99']
+    #dirs = ["tetris-20230614-150528-ms25000-e3-ese2000-d0.99"]
     max_scores = []
     for d in dirs:
         print(f"Evaluating dir '{d}'")
