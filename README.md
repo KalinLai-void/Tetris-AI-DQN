@@ -1,4 +1,4 @@
-# tetris-ai
+# Tetris-AI-DQN
 
 A bot that plays [tetris](https://en.wikipedia.org/wiki/Tetris) using deep reinforcement learning.
 
