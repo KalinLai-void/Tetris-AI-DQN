@@ -1,4 +1,6 @@
-# tetris-ai
+# Tetris-AI-DQN
+
+This is the final project of the course "Deep Learning" in my college.
 
 A bot that plays [tetris](https://en.wikipedia.org/wiki/Tetris) using deep reinforcement learning.
 
@@ -37,10 +39,10 @@ The results usually vary from run to run, so some patience required.
 First 10000 points, after training.
 
 - Origin
-![Demo - First 10000 points](_img/Origin/demo.gif)
+![Demo - First 10000 points](Img/Origin/demo.gif)
 
-- UI
-![Demo - UI](_img/demo-ui.gif)
+- UI (Designed by my teammate)
+![Demo - UI](Img/demo-ui.gif)
 
 ## How does it work
 
@@ -110,12 +112,12 @@ For the training, the replay queue had size 20000, with a random sample of 512 s
 - - Numpy (`numpy==1.23.5`)
 - Pillow(`Pillow==9.4.0 `)
 - Tqdm (`tqdm==4.65.0`)
-- Pandas==1.5.3 (`Pandas==1.5.3`)
-- Matplotlib==3.7.1 (`Matplotlib==3.7.1`)
+- Pandas (`Pandas==1.5.3`)
+- Matplotlib (`Matplotlib==3.7.1`)
 
 ## Results
 
-![results](_img/Training Avg. Score.png)
+![results](Img/Training_AvgScore.png)
 
 Note: Decreasing the `epsilon_end_episode` could make the agent achieve better results in a smaller number of episodes.
 
